@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-import os
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # 对样本进行预处理
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
@@ -23,7 +20,7 @@ img_width, img_height, channels = 233, 240, 1
 input_shape = (img_width, img_height, channels)
 
 # 训练和测试数据路径
-target = 'E:\\test3\\test\\num_data\\'
+target = 'D:\\Temp\\smart_eye\\num_data\\'
 train_data_dir = target + 'train\\'
 validation_data_dir = target + 'validation\\'
 
@@ -39,7 +36,7 @@ train_pic_gen = ImageDataGenerator(
 # 测试集不做变形处理，只需归一化。
 validation_pic_gen = ImageDataGenerator( rescale=1. / 255 )
 
-# 按文件夹生成训练集流和标签，
+# 按文件夹生成训练集流和标签
 train_flow = train_pic_gen.flow_from_directory(
     train_data_dir,
     target_size=(img_width, img_height),  # 调整图像大小
@@ -83,12 +80,12 @@ model.compile( loss='categorical_crossentropy', optimizer="adam", metrics=['accu
 model.summary()
 
 # 回调函数，保存最佳训练参数
-checkpointer = ModelCheckpoint( filepath="E:\\test3\\test\\num_data\\weights\\weights.h5", verbose=1,
+checkpointer = ModelCheckpoint( filepath="D:\\Temp\\smart_eye\\num_data\\weights\\weights.h5", verbose=1,
                                 save_best_only=True )
 
 # 导入上次训练的权重
 try:
-    model.load_weights( './weights/weights.h5' )
+    model.load_weights( 'D:\\Temp\\smart_eye\\num_data\\weights\\weights.h5' )
     print( "load weights..." )
 except:
     print( "not weights" )
