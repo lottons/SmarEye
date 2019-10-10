@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+'''
+摄像头采集图片验证
+author:Administrator
+datetime:2018/3/25/025 9:27
+software: PyCharm
+'''
+import cv2
+import matplotlib.pyplot as plt
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.preprocessing import image
+from keras.optimizers import SGD
+
+import numpy as np
+
+# 图片尺寸
+img_width, img_height, channels= 160, 120, 1
+input_shape = (img_width, img_height, channels)
+
+
+# 获取图片并进行预处理
+def img_pre(img_path='D:\\Temp\\smart_eye\\data\\temp.png'):
+    img = image.load_img(img_path, grayscale=True, target_size=(img_width, img_height))
+    # plt.imshow(img)
+    # plt.show()
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    x /= 255.0
+    # print(x.shape)
+    return x
+
+
+# 搭建神经网络
+model = Sequential()
+
+model.add(Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
+model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+model.add(Flatten())
+model.add(Dense(256, activation='relu'))
+model.add(Dense(64, activation='softmax'))
+
+# 载入权重
+# model.load_weights('./weights/weights.h5')
+
+
+# 图像预处理
+def img_p(img):
+    rows, cols, channels = img.shape
+    # 灰度化
+    gray_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # 平滑滤波
+    blur = cv2.blur(gray_img, (3, 3))
+
+    # 二值化
+    ret1, th1 = cv2.threshold(blur, 190, 255, cv2.THRESH_BINARY)
+
+    # 透视变换
+    b = 50
+    pts1 = np.float32([[b, 0], [cols - b, 0], [0, rows], [cols, rows]])
+    pts2 = np.float32([[0, 0], [cols, 0], [0, rows], [cols, rows]])
+    M = cv2.getPerspectiveTransform(pts1, pts2)
+    dst = cv2.warpPerspective(th1, M, (cols, rows))
+
+    return dst
+
+
+# cap = cv2.VideoCapture(1)  # 打开usb摄像头
+# cap.set(3, 320)
+# cap.set(4, 240)
+# ret, frame = cap.read()  # 读取一帧图片
+frame = cv2.imread( 'D:\\Temp\\smart_eye\\data\\234_b.jpg' )
+print(frame.shape)
+num = ''
+while True:
+    # ret, frame = cap.read()  # 读取一帧图片
+    frame = cv2.imread('D:\\Temp\\smart_eye\\data\\234_b.jpg')
+    # 判断按键按下
+    k = cv2.waitKey(1)
+
+    if k == ord('s'):  # 如果‘s’键按下，截图保存图片到电脑
+
+        # 图片预处理
+        dst = img_p(frame)
+
+        cv2.imwrite('D:\\Temp\\smart_eye\\data\\temp.png', dst)
+        cv2.imshow('dst', dst)
+
+        # 读取归一化处理过的图片
+        xr = img_pre()
+
+        # 进行预测,返回分类结果
+        classes = model.predict_classes(xr)[0]
+        num = str(classes + 1)
+        print("num:", num)  # 打印结果
+
+    elif k == ord('q'):
+        break
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(frame, num, (10, 50), font, 2, (0, 0, 255), 4, cv2.LINE_AA)  # 在图片上显示预测结果
+    cv2.imshow('frame', frame)  # 显示图片
+
+cv2.destroyAllWindows()
+# cap.release()
