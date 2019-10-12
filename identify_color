@@ -50,25 +50,42 @@ while True:
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText( Img, str( p ), (x - 10, y + 10), font, 1, (0, 0, 255), 2 )  # 加减10是调整字符位置
             p += 1
-            print( '第 ', p, '个的坐标 X: ', x, ', Y: ', y, ' W: ', w, 'H: ', h )
-            if 130 <= x <= 180 and 130 <= y <= 180:
-                result[3] = "green"
+            print( '第 ', p, '个的坐标 X: ', x, ' W: ', w, ', Y: ', y, 'H: ', h )
+            # 这里判断监测点是否在识别到的颜色块内
+            # 第1个监测点坐标 155 180 对应车位1
+            if x < 420 and x + w > 420 and y < 170 and y + h > 170:
+                result[0] = 'green'
 
-            if 380 <= x <= 430 and 140 <= y <= 190:
-                result[0] = "green"
+            # 第2个监测点坐标 155 180 对应车位2
+            if x < 155 and x + w > 155 and y < 170 and y + h > 170:
+                result[1] = 'green'
 
-            if 370 <= x <= 420 and 30 <= y <= 80:
-                result[2] = "green"
+            # 第3个监测点坐标 155 180 对应车位3
+            if x < 400 and x + w > 400 and y < 60 and y + h > 60:
+                result[2] = 'green'
 
-            if 180 <= x <= 230 and 10 <= y <= 60:
-                result[1] = "green"
+            # 第4个监测点坐标 155 180 对应车位4
+            if x < 205 and x + w > 205 and y < 60 and y + h > 60:
+                result[3] = 'green'
+
+            # if 130 <= x <= 180 and 130 <= y <= 180:
+            #     result[3] = "green"
+            #
+            # if 380 <= x <= 430 and 140 <= y <= 190:
+            #     result[0] = "green"
+            #
+            # if 370 <= x <= 420 and 30 <= y <= 80:
+            #     result[2] = "green"
+            #
+            # if 180 <= x <= 230 and 10 <= y <= 60:
+            #     result[1] = "green"
 
         print( '绿色方块的数量是', p, '个' )  # 终端输出目标数量
-        print(result)
+        print( result )
 
         try:
             f = open( 'E:\\test3\\test\\data\\result.txt', 'w' )
-            image_path = f.writelines(" ".join(str(i) for i in result))
+            image_path = f.writelines( " ".join( str( i ) for i in result ) )
         finally:
             if f:
                 f.close()
